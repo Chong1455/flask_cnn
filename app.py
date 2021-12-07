@@ -22,7 +22,7 @@ from flask_login import login_user, login_required, logout_user
 from myproject.models import User
 from myproject.forms import LoginForm, RegistrationForm
 
-global label, movies
+global label, movies, cap
 
 face_classifier = cv2.CascadeClassifier(
     cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
@@ -102,8 +102,6 @@ horror = [
     "A quiet place",
 ]
 
-cap = cv2.VideoCapture(0)
-
 
 def predict_emotion(frame):
     global label
@@ -140,7 +138,8 @@ def recommend_movies(label):
 
 
 def generate_frames():
-    global label
+    global cap, label
+    cap = cv2.VideoCapture(0)
     while True:
         success, frame = cap.read()
         if not success:
@@ -155,8 +154,18 @@ def generate_frames():
 
 
 @app.route("/")
-def index():
-    return render_template("index.html")
+def entry():
+    return redirect("/login")
+
+
+@app.route("/profile")
+def profile():
+    return render_template("profile.html")
+
+
+@app.route("/capture")
+def capture():
+    return render_template("capture.html")
 
 
 @app.route("/video")
@@ -168,7 +177,9 @@ def video():
 
 @app.route("/predict", methods=["GET", "POST"])
 def predict():
-    global label, movies
+    global label, movies, cap
+    cap.release()
+    cv2.destroyAllWindows()
     movies = recommend_movies(label)
     return render_template("predict.html", label=label, movies=movies)
 
@@ -178,7 +189,7 @@ def predict():
 def logout():
     logout_user()
     flash("You logged out!")
-    return redirect(url_for("home"))
+    return redirect(url_for("login"))
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -194,7 +205,7 @@ def login():
                 next = request.args.get("next")
 
                 if next == None or not next[0] == "/":
-                    next = url_for("welcome_user")
+                    next = url_for("profile")
 
                 return redirect(next)
 
@@ -220,6 +231,9 @@ def register():
         db.session.commit()
         flash("Thanks for registration!")
         return redirect(url_for("login"))
+
+    else:
+        flash("Passwords must match!")
 
     return render_template("register.html", form=form)
 

@@ -16,8 +16,9 @@
   </head>
   <body>
     <ul class="nav">
-      <li class="nav-link"><a href="{{url_for('index')}}">Home</a></li>
       {% if current_user.is_authenticated %}
+      <li class="nav-link"><a href="{{url_for('profile')}}">Profile</a></li>
+      <li class="nav-link"><a href="{{url_for('capture')}}">Recommend</a></li>
       <li class="nav-link"><a href="{{url_for('logout')}}">Logout</a></li>
       {% else %}
       <li class="nav-link"><a href="{{url_for('login')}}">Login</a></li>

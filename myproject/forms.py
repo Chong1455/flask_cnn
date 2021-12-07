@@ -1,3 +1,4 @@
+from flask import flash
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Email, EqualTo
@@ -28,8 +29,3 @@ class RegistrationForm(FlaskForm):
         if User.query.filter_by(email=self.email.data).first():
             flash("Email has been registered")
             raise ValidationError("Email has been registered")
-
-    def validate_username(self, username):
-        if User.query.filter_by(username=self.username.data).first():
-            flash("Username has been registered")
-            raise ValidationError("Username has been registered")
