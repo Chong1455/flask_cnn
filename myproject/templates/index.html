@@ -1,0 +1,11 @@
+{% extends "base.html" %} {% block content %}
+<h1>Live streaming</h1>
+<div class="center">
+  <img src="{{ url_for('video') }}" />
+</div>
+<div class="center">
+  <form method="post" action="/predict">
+    <input class="btn btn-primary" type="submit" value="Predict" />
+  </form>
+</div>
+{% endblock %}

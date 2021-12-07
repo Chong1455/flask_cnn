@@ -1,0 +1,9 @@
+{% extends "base.html" %} {% block content %}
+<p>Your emotion is {{label}}</p>
+<p>Your recommended movies are</p>
+<ul>
+  {% for movie in movies%}
+  <li>{{movie}}</li>
+  {% endfor %}
+</ul>
+{% endblock %}
