@@ -186,11 +186,17 @@ def predict():
     cv2.destroyAllWindows()
     movies = recommend_movies(label)
 
+    all_movies = Movie.query.all()
+    all_movies_list = []
+    for i in all_movies:
+        all_movies_list.append(i.movies)
+
     if movies:
         for movie in movies:
-            movie_row = Movie(user_id=current_user.id, movies=movie)
-            db.session.add(movie_row)
-            db.session.commit()
+            if movie not in all_movies_list:
+                movie_row = Movie(user_id=current_user.id, movies=movie)
+                db.session.add(movie_row)
+                db.session.commit()
 
     return render_template("predict.html", label=label, movies=movies)
 
