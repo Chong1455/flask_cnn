@@ -117,7 +117,7 @@ def predict_emotion(frame):
 
         prediction = cnn.predict(test_image)[0]
         label = emotion_labels[prediction.argmax()]
-    return label
+    return
 
 
 def recommend_movies(label):
@@ -145,7 +145,7 @@ def generate_frames():
         if not success:
             break
         else:
-            label = predict_emotion(frame)
+            predict_emotion(frame)
 
             ret, buffer = cv2.imencode(".jpg", frame)
             frame = buffer.tobytes()
