@@ -1,5 +1,11 @@
 {% extends "base.html" %} {% block content %}
 <div class="jumbotron">
-  <p>Hi {{current_user.username}}</p>
+  <p>Hi {{user.username}}</p>
+  <p>Your recommended movies are</p>
+  <ul>
+    {% for movie in movies_list%}
+    <li>{{movie.movies}}</li>
+    {% endfor %}
+  </ul>
 </div>
 {% endblock %}

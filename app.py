@@ -18,8 +18,8 @@ import os
 import sys
 import random
 from myproject import app, db
-from flask_login import login_user, login_required, logout_user
-from myproject.models import User
+from flask_login import login_user, login_required, logout_user, current_user
+from myproject.models import User, Movie
 from myproject.forms import LoginForm, RegistrationForm
 
 global label, movies, cap
@@ -160,7 +160,11 @@ def entry():
 
 @app.route("/profile")
 def profile():
-    return render_template("profile.html")
+    user = User.query.filter_by(id=current_user.id).first_or_404()
+    movies_list = Movie.query.filter(Movie.user_id == current_user.id).order_by(
+        Movie.id
+    )[::-1]
+    return render_template("profile.html", user=user, movies_list=movies_list)
 
 
 @app.route("/capture")
@@ -181,6 +185,13 @@ def predict():
     cap.release()
     cv2.destroyAllWindows()
     movies = recommend_movies(label)
+
+    if movies:
+        for movie in movies:
+            movie_row = Movie(user_id=current_user.id, movies=movie)
+            db.session.add(movie_row)
+            db.session.commit()
+
     return render_template("predict.html", label=label, movies=movies)
 
 

@@ -14,8 +14,10 @@ class User(db.Model, UserMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(64), unique=True, index=True)
-    username = db.Column(db.String(64), unique=True, index=True)
+    username = db.Column(db.String(64))
     password_hash = db.Column(db.String(128))
+
+    post = db.relationship("Movie", backref="viewer", lazy=True)
 
     def __init__(self, email, username, password):
         self.email = email
@@ -24,3 +26,18 @@ class User(db.Model, UserMixin):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+
+class Movie(db.Model):
+
+    __tablename__ = "movies"
+
+    users = db.relationship(User)
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    movies = db.Column(db.String(64))
+
+    def __init__(self, user_id, movies):
+        self.user_id = user_id
+        self.movies = movies
