@@ -27,5 +27,5 @@ class RegistrationForm(FlaskForm):
 
     def validate_email(self, email):
         if User.query.filter_by(email=self.email.data).first():
-            flash("Email has been registered")
+            flash("Email has been registered", "danger")
             raise ValidationError("Email has been registered")

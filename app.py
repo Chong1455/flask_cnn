@@ -205,7 +205,7 @@ def predict():
 @login_required
 def logout():
     logout_user()
-    flash("You logged out!")
+    flash("You logged out!", "info")
     return redirect(url_for("login"))
 
 
@@ -217,7 +217,7 @@ def login():
         try:
             if user.check_password(form.password.data) and user is not None:
                 login_user(user)
-                flash("Logged in Successfully!")
+                flash("Logged in Successfully!", "info")
 
                 next = request.args.get("next")
 
@@ -227,9 +227,9 @@ def login():
                 return redirect(next)
 
             else:
-                flash("Password is incorrect!")
+                flash("Password is incorrect!", "danger")
         except:
-            flash("Email is incorrect!")
+            flash("Email is incorrect!", "danger")
 
     return render_template("login.html", form=form)
 
@@ -246,11 +246,10 @@ def register():
         )
         db.session.add(user)
         db.session.commit()
-        flash("Thanks for registration!")
+        flash("Thanks for registration!", "info")
         return redirect(url_for("login"))
-
     else:
-        flash("Passwords must match!")
+        flash(form.errors["password"][0])
 
     return render_template("register.html", form=form)
 

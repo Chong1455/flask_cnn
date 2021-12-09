@@ -25,9 +25,10 @@
       <li class="nav-link"><a href="{{url_for('register')}}">Register</a></li>
       {% endif %}
     </ul>
-    {% for message in get_flashed_messages() %}
-    <p>{{ message }}</p>
-    {% endfor %} {% block content %} {% endblock %}
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %} {% for category, message in messages %}
+    <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+    {% endfor %} {% endif %} {% endwith %} {% block content %} {% endblock %}
     <!-- Boostrap JS -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
