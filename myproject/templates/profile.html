@@ -1,11 +1,35 @@
-{% extends "base.html" %} {% block content %}
-<div class="jumbotron">
-  <p>Hi {{user.username}}</p>
-  <p>Your recommended movies are</p>
-  <ul>
+{% extends "base.html" %} {% block head %}
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{{ url_for('static', filename='predict.css') }}"
+/>
+{% endblock %} {% block content %}
+<p>Hi {{user.username}}</p>
+<p>Your recommended movies are</p>
+<div class="container">
+  <div class="row">
     {% for movie in movies_list%}
-    <li>{{movie.movies}}</li>
+    <div class="col">
+      <div class="card" style="width: 20rem">
+        <img
+          class="card-img-top"
+          src="{{movie.image_url}}"
+          alt="Card image cap"
+          width="500"
+          height="350"
+        />
+        <div class="card-body">
+          <h5 class="card-title">{{movie.movie_title}}</h5>
+        </div>
+      </div>
+      <div class="center buttonContainer">
+        <a target="_blank" href="{{movie.movie_url}}" class="btn btn-primary"
+          >See details</a
+        >
+      </div>
+    </div>
     {% endfor %}
-  </ul>
+  </div>
 </div>
 {% endblock %}

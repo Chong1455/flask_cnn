@@ -21,88 +21,29 @@ from myproject import app, db
 from flask_login import login_user, login_required, logout_user, current_user
 from myproject.models import User, Movie
 from myproject.forms import LoginForm, RegistrationForm
-
-global label, movies, cap
+import requests
+from bs4 import BeautifulSoup
 
 face_classifier = cv2.CascadeClassifier(
     cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
 )
+# Loading the cnn model
 cnn = load_model("./myproject/cnn_model2")
-emotion_labels = ["Angry", "Disgust", "Fear", "Happy", "Neutral", "Sad", "Surprise"]
-thriller = [
-    "The chaser",
-    "Cold eyes",
-    "Prisoners",
-    "The call",
-    "Predestination",
-    "Inception",
-    "Interstellar",
-    "Shutter Island",
-    "Momento",
-    "Coherence",
-]
-romantic = [
-    "your name",
-    "weathering with you",
-    "beauty and the beast",
-    "titanic",
-    "A silent voice",
-    "slumdog millionaitre",
-    "never let me go",
-    "5cm per second",
-    "passengers",
-    "silver linings playbook",
-]
-comedy = [
-    "The vacation",
-    "Anger management",
-    "Free guy",
-    "Johnny English",
-    "Dictator",
-    "booksmart",
-    "game night",
-    "horrible bosses",
-    "this is the end",
-    "borat",
-]
-action = [
-    "wreck it ralph",
-    "Bad boys",
-    "Man in black",
-    "Kingsman",
-    "Mad max",
-    "The maze runner",
-    "Avengers",
-    "Extraction",
-    "Ip man",
-    "white house down",
-]
-family = [
-    "Coco",
-    "Click",
-    "Raya the lost dragon",
-    "Harry potter",
-    "The lion king",
-    "Christopher robin",
-    "The incredibles",
-    "Toy story",
-    "Fast & furious",
-    "mulan",
-]
-horror = [
-    "Cabin in the woods",
-    "Train to busan",
-    "Zombieland",
-    "World War Z",
-    "Overlord",
-    "Peninsula",
-    "#Alive",
-    "Sputnik 2020",
-    "Life",
-    "A quiet place",
+
+# Global variables
+global label, cap, genre
+
+emotion_labels = [
+    "Angry😤",
+    "Disgust🤮",
+    "Fear😨",
+    "Happy😃",
+    "Neutral😐",
+    "Sad🙁",
+    "Surprise😮",
 ]
 
-
+# Predicts the emotion of user by passing the snapshot to the model
 def predict_emotion(frame):
     global label
     img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -121,19 +62,73 @@ def predict_emotion(frame):
 
 
 def recommend_movies(label):
-    global movies
-    if label == "Neutral":
-        movies = random.sample(thriller, 3)
-    elif label == "Happy":
-        movies = random.sample(romantic, 3)
-    elif label == "Sad":
-        movies = random.sample(comedy, 3)
-    elif label == "Angry" or label == "Disgust":
-        movies = random.sample(action, 3)
-    elif label == "Fear":
-        movies = random.sample(family, 3)
+    global genre
+    if label == "Neutral😐":
+        genre = "thriller"
+        imbd_url = "https://www.imdb.com/search/title/?genres=thriller&title_type=feature&sort=moviemeter"
+    elif label == "Happy😃":
+        genre = "romance"
+        imbd_url = "https://www.imdb.com/search/title/?genres=romance&title_type=feature&sort=moviemeter"
+    elif label == "Sad🙁":
+        genre = "comedy"
+        imbd_url = "https://www.imdb.com/search/title/?genres=comedy&title_type=feature&sort=moviemeter"
+    elif label == "Angry😤" or label == "Disgust🤮":
+        genre = "action"
+        imbd_url = "https://www.imdb.com/search/title/?genres=action&title_type=feature&sort=moviemeter"
+    elif label == "Fear😨":
+        genre = "family"
+        imbd_url = "https://www.imdb.com/search/title/?genres=family&title_type=feature&sort=moviemeter"
     else:  # surprise
-        movies = random.sample(horror, 3)
+        genre = "horror"
+        imbd_url = "https://www.imdb.com/search/title/?genres=horror&title_type=feature&sort=moviemeter"
+
+    # Web Scraping
+    class MovieObject:
+        def __init__(self, movie_title, movie_url, image_url):
+            self.movie_title = movie_title
+            self.movie_url = movie_url
+            self.image_url = image_url
+
+    top50_titles = []
+    top50_urls = []
+    top50_images = []
+    movies = []
+
+    page = requests.get(imbd_url)
+
+    soup = BeautifulSoup(page.content, "html.parser")
+
+    movie_headers = soup.find_all("h3", class_="lister-item-header")
+    for movie_header in movie_headers:
+        movie_title = movie_header.find("a").text
+        movie_url = "https://www.imdb.com" + movie_header.find("a")["href"]
+        top50_titles.append(movie_title)
+        top50_urls.append(movie_url)
+
+    movie_images = soup.find_all("div", class_="lister-item-image float-left")
+    for movie_image in movie_images:
+        image_path = movie_image.find("img")["loadlate"]
+        big_image = image_path.split(
+            "_"
+        )  # split the url to make the image looks bigger
+        image_url = big_image[0] + "jpg"
+        top50_images.append(image_url)
+
+    # Pick 3 random movies
+    randomNumberList = []
+    while len(randomNumberList) < 3:
+        randomNumber = random.randint(0, 49)
+        if (
+            randomNumber not in randomNumberList
+        ):  # Make sure the recommended movies are unique
+            movies.append(
+                MovieObject(
+                    top50_titles[randomNumber],
+                    top50_urls[randomNumber],
+                    top50_images[randomNumber],
+                )
+            )
+            randomNumberList.append(randomNumber)
     return movies
 
 
@@ -179,31 +174,39 @@ def video():
 
 @app.route("/predict", methods=["GET", "POST"])
 def predict():
-    global label, movies, cap
+    global label, cap, genre
     cap.release()
     cv2.destroyAllWindows()
     movies = recommend_movies(label)
 
-    all_movies = Movie.query.all()
-    all_movies_list = []
+    # Insert to movie database
+    all_movies = Movie.query.filter_by(user_id=current_user.id)
+    all_movies_titles = []
     for i in all_movies:
-        all_movies_list.append(i.movies)
+        all_movies_titles.append(i.movie_title)
 
     if movies:
         for movie in movies:
-            if movie not in all_movies_list:
-                movie_row = Movie(user_id=current_user.id, movies=movie)
+            if (
+                movie.movie_title not in all_movies_titles
+            ):  # insert movies that do not exist in database
+                movie_row = Movie(
+                    user_id=current_user.id,
+                    movie_title=movie.movie_title,
+                    movie_url=movie.movie_url,
+                    image_url=movie.image_url,
+                )
                 db.session.add(movie_row)
                 db.session.commit()
 
-    return render_template("predict.html", label=label, movies=movies)
+    return render_template("predict.html", label=label, movies=movies, genre=genre)
 
 
 @app.route("/logout")
 @login_required
 def logout():
     logout_user()
-    flash("You logged out!", "info")
+    flash("You are logged out!", "info")
     return redirect(url_for("login"))
 
 
@@ -215,7 +218,7 @@ def login():
         try:
             if user.check_password(form.password.data) and user is not None:
                 login_user(user)
-                flash("Logged in Successfully!", "info")
+                flash("Logged in successfully!", "info")
 
                 next = request.args.get("next")
 
@@ -226,6 +229,7 @@ def login():
 
             else:
                 flash("Password is incorrect!", "danger")
+
         except:
             flash("Email is incorrect!", "danger")
 
@@ -244,10 +248,10 @@ def register():
         )
         db.session.add(user)
         db.session.commit()
-        flash("Thanks for registration!", "info")
+        flash("Thank you for your registration!", "info")
         return redirect(url_for("login"))
-    else:
-        flash(form.errors["password"][0])
+    # else:
+    #     flash(form.errors["password"][0])
 
     return render_template("register.html", form=form)
 

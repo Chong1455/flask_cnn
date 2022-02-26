@@ -36,8 +36,12 @@ class Movie(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    movies = db.Column(db.String(64))
+    movie_title = db.Column(db.String(64))
+    movie_url = db.Column(db.String(200))
+    image_url = db.Column(db.String(200))
 
-    def __init__(self, user_id, movies):
+    def __init__(self, user_id, movie_title, movie_url, image_url):
         self.user_id = user_id
-        self.movies = movies
+        self.movie_title = movie_title
+        self.movie_url = movie_url
+        self.image_url = image_url

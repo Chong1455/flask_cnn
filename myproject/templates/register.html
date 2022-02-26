@@ -1,9 +1,40 @@
-{% extends "base.html" %} {% block content %}
-<form method="POST">
-  {{form.hidden_tag()}} {{form.email.label}}{{form.email()}}<br />
-  {{form.username.label}}{{form.username()}}<br />
-  {{form.password.label}}{{form.password()}}<br />
-  {{form.pass_confirm.label}}{{form.pass_confirm()}}<br />
-  {{form.submit}}
-</form>
+{% extends "base.html" %} {% block head %}
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{{ url_for('static', filename='login.css') }}"
+/>
+{% endblock %} {% block content %}
+<div class="cardContainer center">
+  <div class="card" style="width: 18rem">
+    <div class="card-body">
+      <h1 class="card-title">Register</h5>
+      <form method="POST">
+        <div class="mb-3">
+          {{form.hidden_tag()}}
+          <div class="text-label">
+            {{form.username.label}}
+          </div>
+          {{form.username(class="form-control")}}
+        </div>
+        <div class="mb-3">
+          <div class="text-label">
+            {{form.email.label}}
+          </div>
+          {{form.email(class="form-control")}}
+        </div>
+        <div class="mb-3">
+          <div class="text-label">
+            {{form.password.label}}
+          </div>
+          {{form.password(class="form-control")}}
+        </div>
+        <div class="center register-button">
+        {{form.submit(class="btn btn-outline-dark")}}
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock %}
+

@@ -9,23 +9,19 @@ from myproject.models import User
 class LoginForm(FlaskForm):
     email = StringField("Email", validators=[DataRequired(), Email()])
     password = PasswordField("Password", validators=[DataRequired()])
-    submit = SubmitField("Login")
+    submit = SubmitField("Sign In")
 
 
 class RegistrationForm(FlaskForm):
     email = StringField("Email", validators=[DataRequired(), Email()])
-    username = StringField("Username", validators=[DataRequired()])
+    username = StringField("Name", validators=[DataRequired()])
     password = PasswordField(
         "Password",
-        validators=[
-            DataRequired(),
-            EqualTo("pass_confirm", message="Passwords must match!"),
-        ],
+        validators=[DataRequired()],
     )
-    pass_confirm = PasswordField("Confirm Password", validators=[DataRequired()])
-    submit = SubmitField("Register!")
+    submit = SubmitField("Register")
 
     def validate_email(self, email):
         if User.query.filter_by(email=self.email.data).first():
-            flash("Email has been registered", "danger")
+            # flash("Email has been registered", "danger")
             raise ValidationError("Email has been registered")
