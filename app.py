@@ -27,8 +27,8 @@ from bs4 import BeautifulSoup
 face_classifier = cv2.CascadeClassifier(
     cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
 )
-# Loading the cnn model
-cnn = load_model("./myproject/cnn_model2")
+# Load the cnn model
+cnn = load_model("./myproject/cnn_model3")
 
 # Global variables
 global label, cap, genre
@@ -50,7 +50,9 @@ def predict_emotion(frame):
     faces = face_classifier.detectMultiScale(img)
 
     for (x, y, w, h) in faces:
+        # Crop the face
         crop_image = img[y : y + h, x : x + w]
+        # Resize the image to 48x48
         crop_image = cv2.resize(crop_image, (48, 48), interpolation=cv2.INTER_AREA)
 
         test_image = img_to_array(crop_image)
@@ -153,7 +155,9 @@ def entry():
 
 @app.route("/profile")
 def profile():
+    # Get the current user
     user = User.query.filter_by(id=current_user.id).first_or_404()
+    # Get all the recommended movies
     movies_list = Movie.query.filter(Movie.user_id == current_user.id).order_by(
         Movie.id
     )[::-1]
