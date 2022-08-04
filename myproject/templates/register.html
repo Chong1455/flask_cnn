@@ -1,45 +1,44 @@
 {% extends "base.html" %} {% block head %}
+<!-- Google fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Sriracha&display=swap"
+  rel="stylesheet"
+/>
 <link
   rel="stylesheet"
   type="text/css"
   href="{{ url_for('static', filename='login.css') }}"
 />
 {% endblock %} {% block content %}
-<div id="particles-js"></div>
-<h1>Movie Recommendation System</h1>
-<div class="cardContainer center">
-  <div class="card" style="width: 18rem">
-    <div class="card-body">
-      <h2 class="card-title">Register</h2>
-      <form method="POST">
-        <div class="mb-3">
-          {{form.hidden_tag()}}
-          <div class="text-label">{{form.username.label}}</div>
-          {{form.username(class="form-control")}}
-        </div>
-        <div class="mb-3">
-          <div class="text-label">{{form.email.label}}</div>
-          {{form.email(class="form-control")}}
-        </div>
-        <div class="mb-3">
-          <div class="text-label">{{form.password.label}}</div>
-          {{form.password(class="form-control")}}
-        </div>
-        <div class="center register-button">
-          {{form.submit(class="btn btn-outline-dark")}}
-        </div>
-      </form>
+<div class="bg">
+  <h1 class="title-text">MOVIE4U</h1>
+  <h3 class="desc-text">An Emotion-Based Movie Recommendation System</h3>
+  <div class="center">
+    <div class="card" style="width: 18rem">
+      <div class="card-body">
+        <h2 class="card-title">Register</h2>
+        <form method="POST">
+          <div class="mb-3">
+            {{form.hidden_tag()}}
+            <div class="text-label">{{form.username.label}}</div>
+            {{form.username(class="form-control")}}
+          </div>
+          <div class="mb-3">
+            <div class="text-label">{{form.email.label}}</div>
+            {{form.email(class="form-control")}}
+          </div>
+          <div class="mb-3">
+            <div class="text-label">{{form.password.label}}</div>
+            {{form.password(class="form-control")}}
+          </div>
+          <div class="center submit-button" style="font-family: Sriracha">
+            {{form.submit(class="predictButton")}}
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-<script>
-  particlesJS.load(
-    "particles-js",
-    "{{ url_for('static', filename='particles.json') }}",
-    function () {
-      console.log("particles.json has loaded");
-    }
-  );
-</script>
 {% endblock %}

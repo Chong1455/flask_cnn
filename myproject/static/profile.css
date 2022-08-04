@@ -1,0 +1,21 @@
+.profileContainer {
+  margin-left: 75px;
+  margin-right: 75px;
+  width: 500px;
+}
+
+.title-text {
+  color: aqua;
+  font-family: Sriracha;
+  font-size: 35px;
+}
+
+.text-label {
+  color: white;
+  font-family: Sriracha;
+  font-size: 20px;
+}
+
+.submit-button {
+  font-size: 15px;
+}

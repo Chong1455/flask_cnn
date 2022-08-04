@@ -1,35 +1,46 @@
 {% extends "base.html" %} {% block head %}
+<!-- Google fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Sriracha&display=swap"
+  rel="stylesheet"
+/>
 <link
   rel="stylesheet"
   type="text/css"
-  href="{{ url_for('static', filename='predict.css') }}"
+  href="{{ url_for('static', filename='profile.css') }}"
 />
 {% endblock %} {% block content %}
-<p>You look {{label}}</p>
-<p>Here are some {{genre}} movies that you might enjoy watching:</p>
-<div class="container">
-  <div class="row">
-    {% for movie in movies%}
-    <div class="col">
-      <div class="card" style="width: 20rem">
-        <img
-          class="card-img-top"
-          src="{{movie.image_url}}"
-          alt="Card image cap"
-          width="500"
-          height="350"
-        />
-        <div class="card-body">
-          <h5 class="card-title">{{movie.movie_title}}</h5>
+<p class="text-label" style="margin-left:75px;">You look {{label}}</p>
+<p class="text-label" style="margin-left:75px;">Here are some {{genre}} movies that you might enjoy watching:</p>
+<div id="team" class="our-team-area area-padding">
+  <div class="container">
+    <div class="row">
+      {% for movie in movies%}
+      <div
+        class="col-md-4 col-sm-4 col-xs-12 portfolio-item filter-app portfolio-item"
+      >
+        <div class="single-awesome-project">
+          <div class="awesome-img">
+            <a href="#"><img src="{{movie.image_url}}" alt="" /></a>
+            <div class="add-actions text-center">
+              <div class="project-dec">
+                  <h4>{{movie.movie_title}}</h4>
+                  <span>{{movie.movie_desc}}</span>
+                  <a href="{{movie.movie_url}}" target="_blank">
+                    <img
+                      src="{{ url_for('static', filename='img/link.png') }}" height="48px" width="48px"
+                    />
+                  </a>
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="center buttonContainer">
-        <a target="_blank" href="{{movie.movie_url}}" class="btn btn-primary"
-          >See details</a
-        >
-      </div>
+      {% endfor %}
     </div>
-    {% endfor %}
   </div>
 </div>
 {% endblock %}

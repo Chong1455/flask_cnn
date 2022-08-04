@@ -1,35 +1,54 @@
 {% extends "base.html" %} {% block head %}
+<!-- Google fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Sriracha&display=swap"
+  rel="stylesheet"
+/>
 <link
   rel="stylesheet"
   type="text/css"
-  href="{{ url_for('static', filename='predict.css') }}"
+  href="{{ url_for('static', filename='profile.css') }}"
 />
 {% endblock %} {% block content %}
-<p>Hi {{user.username}}</p>
-<p>Your recommended movies are</p>
-<div class="container">
-  <div class="row">
-    {% for movie in movies_list%}
-    <div class="col">
-      <div class="card" style="width: 20rem">
-        <img
-          class="card-img-top"
-          src="{{movie.image_url}}"
-          alt="Card image cap"
-          width="500"
-          height="350"
-        />
-        <div class="card-body">
-          <h5 class="card-title">{{movie.movie_title}}</h5>
-        </div>
-      </div>
-      <div class="center buttonContainer">
-        <a target="_blank" href="{{movie.movie_url}}" class="btn btn-primary"
-          >See details</a
-        >
-      </div>
+<div class="profileContainer">
+  <h3 class="title-text">Personal Information</h3>
+  <form>
+    <label class="text-label">Username</label>
+    <br />
+    <input
+      class="form-control"
+      type="text"
+      value="{{user.username}}"
+      readonly
+    />
+    <br />
+    <label class="text-label">Email</label>
+    <br />
+    <input class="form-control" type="text" value="{{user.email}}" readonly />
+  </form>
+  <br />
+  <br />
+  <br />
+  <h3 class="title-text">Password change</h3>
+  <form method="POST">
+    <div class="mb-3">
+      {{form.hidden_tag()}}
+      <div class="text-label">{{form.password.label}}</div>
+      {{form.password(class="form-control")}}
     </div>
-    {% endfor %}
-  </div>
+    <div class="mb-3">
+      <div class="text-label">{{form.new_password.label}}</div>
+      {{form.new_password(class="form-control")}}
+    </div>
+    <div class="mb-3">
+      <div class="text-label">{{form.pass_confirm.label}}</div>
+      {{form.pass_confirm(class="form-control")}}
+    </div>
+    <div class="submit-button" style="font-family: Sriracha">
+      {{form.submit(class="predictButton")}}
+    </div>
+  </form>
 </div>
 {% endblock %}

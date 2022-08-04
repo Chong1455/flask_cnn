@@ -20,15 +20,16 @@ import random
 from myproject import app, db
 from flask_login import login_user, login_required, logout_user, current_user
 from myproject.models import User, Movie
-from myproject.forms import LoginForm, RegistrationForm
+from myproject.forms import LoginForm, RegistrationForm, ChangePasswordForm
 import requests
 from bs4 import BeautifulSoup
+from werkzeug.security import generate_password_hash
 
 face_classifier = cv2.CascadeClassifier(
     cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
 )
 # Load the cnn model
-cnn = load_model("./myproject/cnn_model3")
+cnn = load_model("./myproject/best_model2.h5")
 
 # Global variables
 global label, cap, genre
@@ -50,6 +51,8 @@ def predict_emotion(frame):
     faces = face_classifier.detectMultiScale(img)
 
     for (x, y, w, h) in faces:
+        # Draw the rectangle on face
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 255), 2)
         # Crop the face
         crop_image = img[y : y + h, x : x + w]
         # Resize the image to 48x48
@@ -60,6 +63,16 @@ def predict_emotion(frame):
 
         prediction = cnn.predict(test_image)[0]
         label = emotion_labels[prediction.argmax()]
+        label_position = (x, y - 10)
+        cv2.putText(
+            frame,
+            label[0:-1],
+            label_position,
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1,
+            (0, 255, 0),
+            2,
+        )
     return
 
 
@@ -86,14 +99,16 @@ def recommend_movies(label):
 
     # Web Scraping
     class MovieObject:
-        def __init__(self, movie_title, movie_url, image_url):
+        def __init__(self, movie_title, movie_url, image_url, movie_desc):
             self.movie_title = movie_title
             self.movie_url = movie_url
             self.image_url = image_url
+            self.movie_desc = movie_desc
 
     top50_titles = []
     top50_urls = []
     top50_images = []
+    top50_desc = []
     movies = []
 
     page = requests.get(imbd_url)
@@ -116,6 +131,11 @@ def recommend_movies(label):
         image_url = big_image[0] + "jpg"
         top50_images.append(image_url)
 
+    movie_contents = soup.find_all("div", class_="lister-item-content")
+    for movie_content in movie_contents:
+        movie_desc = movie_content.select("div > p")[1].get_text(strip=True)
+        top50_desc.append(movie_desc)
+
     # Pick 3 random movies
     randomNumberList = []
     while len(randomNumberList) < 3:
@@ -128,6 +148,7 @@ def recommend_movies(label):
                     top50_titles[randomNumber],
                     top50_urls[randomNumber],
                     top50_images[randomNumber],
+                    top50_desc[randomNumber],
                 )
             )
             randomNumberList.append(randomNumber)
@@ -153,15 +174,25 @@ def entry():
     return redirect("/login")
 
 
-@app.route("/profile")
+@app.route("/profile", methods=["GET", "POST"])
 def profile():
     # Get the current user
     user = User.query.filter_by(id=current_user.id).first_or_404()
-    # Get all the recommended movies
-    movies_list = Movie.query.filter(Movie.user_id == current_user.id).order_by(
-        Movie.id
-    )[::-1]
-    return render_template("profile.html", user=user, movies_list=movies_list)
+
+    # Change password
+    form = ChangePasswordForm()
+    if request.method == "POST":
+        if user.check_password(form.password.data):
+            if form.validate_on_submit():
+                user.password_hash = generate_password_hash(form.new_password.data)
+                db.session.commit()
+                flash("Password has been updated!", "info")
+            else:
+                flash(form.errors["new_password"][0], "danger")
+        else:
+            flash("Password is incorrect!", "danger")
+
+    return render_template("profile.html", user=user, form=form)
 
 
 @app.route("/capture")
@@ -199,11 +230,25 @@ def predict():
                     movie_title=movie.movie_title,
                     movie_url=movie.movie_url,
                     image_url=movie.image_url,
+                    movie_desc=movie.movie_desc,
                 )
                 db.session.add(movie_row)
                 db.session.commit()
 
     return render_template("predict.html", label=label, movies=movies, genre=genre)
+
+
+@app.route("/movies")
+def get_movies():
+    # Get the current user
+    user = User.query.filter_by(id=current_user.id).first_or_404()
+
+    # Get all the recommended movies
+    movies_list = Movie.query.filter(Movie.user_id == current_user.id).order_by(
+        Movie.id
+    )[::-1]
+
+    return render_template("movies.html", movies_list=movies_list)
 
 
 @app.route("/logout")
